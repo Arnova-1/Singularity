@@ -1,17 +1,16 @@
 #![no_main]
 #![no_std]
 
-use core::time::Duration;
 use log::info;
+
 use uefi::prelude::*;
 
 #[entry]
 fn main() -> Status {
-    uefi::helpers::init().unwrap();
+    let _ = uefi::boot::set_watchdog_timer(0, 0x10000, None);
 
-    info!("Hello!");
-
-    boot::stall(Duration::from_secs(10));
+    // print
+    info!("Prototype 0: Booting up...");
 
     Status::SUCCESS
 }
