@@ -1,12 +1,16 @@
 #![no_main]
 #![no_std]
 
+mod bootinfo;
+
 use core::time::Duration;
 use log::info;
 
 use uefi::prelude::*;
 use uefi::boot;
-use uefi::proto::loaded_image::LoadedImage;
+use uefi::boot::MemoryType;
+use uefi::system;
+use crate::bootinfo::BootInfo;
 
 #[entry]
 fn main() -> Status {
@@ -19,12 +23,12 @@ fn main() -> Status {
     // print boot up message
     info!("Prototype 0: Booting up...");
 
-    // Get device handle
-    let loaded = boot::open_protocol_exclusive::<LoadedImage>(boot::image_handle());
-    let device = loaded.unwrap().device();
+    let boot_info = BootInfo {
+        uefi_revision: system::uefi_revision(),
+        memory_map: boot::memory_map(MemoryType::LOADER_DATA).unwrap(),
+    };
 
-    // Print loaded device handle (for testing)
-    info!("{:?}", device);
+    info!("UEFI Revision: {:?} Memory Map: {:?}", boot_info.uefi_revision, boot_info.memory_map);
 
     // Wait 10 seconds (for testing)
     boot::stall(Duration::from_secs(10));
