@@ -32,9 +32,11 @@ unsafe fn main() -> Status {
     info!("UEFI Revision: {:?} Memory Map: {:?}", boot_info.uefi_revision, boot_info.memory_map);
 
     // Open GOP and fetch FrameBuffer info
-    let gop = gop::init_gop();
+    let gop_info = gop::init_gop();
 
-    info!("FrameBuffer information: {:?}", gop);
+    info!("FrameBuffer information: {:?}", gop_info);
+
+    gop::clear_screen(&gop_info, (0, 0, 0));
 
     // Wait 10 seconds (for testing)
     boot::stall(Duration::from_secs(10));

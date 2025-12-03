@@ -37,3 +37,38 @@ pub fn init_gop() -> FrameBufferInfo {
         pixel_format: mode.pixel_format(),
     }
 }
+
+pub fn put_pixel(info: &FrameBufferInfo, x: usize, y: usize, color: (u8, u8, u8)) {
+    if x >= info.width || y >= info.height {
+        return;
+    }
+
+    let bytes_per_pixel = 4;
+    let offset = (y * info.stride + x) * bytes_per_pixel;
+
+    unsafe {
+        let ptr = info.fb_ptr.add(offset);
+
+        match info.pixel_format {
+            PixelFormat::Rgb => {
+                *ptr.add(0) = color.0; // R
+                *ptr.add(1) = color.1; // G
+                *ptr.add(2) = color.2; // B
+            }
+            PixelFormat::Bgr => {
+                *ptr.add(0) = color.2; // B
+                *ptr.add(1) = color.1; // G
+                *ptr.add(2) = color.0; // R
+            }
+            _ => {}
+        }
+    }
+}
+
+pub fn clear_screen(info: &FrameBufferInfo, color: (u8, u8, u8)) {
+    for y in 0..info.height {
+        for x in 0..info.width {
+            put_pixel(info, x, y, color);
+        }
+    }
+}
