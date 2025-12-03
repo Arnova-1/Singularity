@@ -26,11 +26,11 @@ pub fn init_gop() -> FrameBufferInfo {
     ).expect("failed to open protocol") };
 
     let mode = gop_protocol.current_mode_info();
-    let mut fb = gop_protocol.frame_buffer();
+    let mut framebuffer = gop_protocol.frame_buffer();
 
     FrameBufferInfo {
-        fb_ptr: fb.as_mut_ptr(),
-        fb_size: fb.size(),
+        fb_ptr: framebuffer.as_mut_ptr(),
+        fb_size: framebuffer.size(),
         width: mode.resolution().0,
         height: mode.resolution().1,
         stride: mode.stride(),
@@ -43,26 +43,20 @@ pub fn put_pixel(info: &FrameBufferInfo, x: usize, y: usize, color: (u8, u8, u8)
         return;
     }
 
-    let bytes_per_pixel = 4;
-    let offset = (y * info.stride + x) * bytes_per_pixel;
+    let fb_slice = unsafe { core::slice::from_raw_parts_mut(info.fb_ptr, info.fb_size) };
+    let offset = (y * info.stride + x) * 4;
 
-    unsafe {
-        let ptr = info.fb_ptr.add(offset);
-
-        match info.pixel_format {
-            PixelFormat::Rgb => {
-                *ptr.add(0) = color.0; // R
-                *ptr.add(1) = color.1; // G
-                *ptr.add(2) = color.2; // B
-            }
-            PixelFormat::Bgr => {
-                *ptr.add(0) = color.2; // B
-                *ptr.add(1) = color.1; // G
-                *ptr.add(2) = color.0; // R
-            }
-            _ => {}
+    let pixel = match info.pixel_format {
+        PixelFormat::Rgb => {
+            ((color.0 as u32) << 16) | ((color.1 as u32) << 8) | (color.2 as u32) // R | G | B
         }
-    }
+        PixelFormat::Bgr => {
+            ((color.2 as u32) << 16) | ((color.1 as u32) << 8) | (color.0 as u32) // B | G | R
+        }
+        _ => return,
+    };
+
+    fb_slice[offset..offset + 4].copy_from_slice(&pixel.to_le_bytes());
 }
 
 pub fn clear_screen(info: &FrameBufferInfo, color: (u8, u8, u8)) {
