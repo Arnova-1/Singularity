@@ -40,3 +40,9 @@
     - -> `core` (the absolute basics - Result, Option, iterators, math, etc.)
 - Rust automatically link to `core` because even with `no_std` we still need basic features like Result, Option, math, etc.
 - The compiler shipped `core` as already built binary that's compiled for common target like `x86_64-unknown-gnu`. Hence why it isn't compatible with our custom target, we would need to compile it ourselves.
+- 1 byte = 8 bit
+- Computer doesn't recognize text, integer, float, and so on. It can only recognize bits which is just either 0 and 1.
+- Ultimately, computer only recognize binaries, that's why the meaning can be interpret differently for the same combination.
+- For example: `01000001` in binaries can be interpreted as `65` (Integer), `0x41` (Hex), or `A` (ASCII).
+- `0xb8000` is VGA text memory adress. It (the VGA hardware) automatically convert ASCII into pixels and display it on screen.
+- VGA had two major modes, `Text mode` where we just provide the character and color and it draw to the screen automatically and `Graphic mode` which we can draw pixels manually. Modern OS doesn't use VGA text mode anymore, meaning every pixel is controlled directly and text rendering is handled by software.
